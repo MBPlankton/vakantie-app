@@ -1685,11 +1685,9 @@ function zoekBestemmingen() {
 
     collapseSearchOnMobile();
 
-    if (window.innerWidth <= 768) {
-        setTimeout(function() {
-            document.querySelector(".results-section").scrollIntoView({ behavior: "smooth", block: "start" });
-        }, 300);
-    }
+    setTimeout(function() {
+        document.querySelector(".results-section").scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 400);
 }
 
 // Service Worker registratie voor PWA
