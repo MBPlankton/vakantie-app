@@ -432,8 +432,48 @@
             .hero p { font-size: 1rem; }
 
             .main-layout { padding: 0 1rem; margin: -1.5rem auto 1rem; }
-            .search-panel { padding: 1rem; border-radius: 16px; }
-            .search-panel h2 { font-size: 1.1rem; }
+            .search-panel {
+                padding: 1rem;
+                border-radius: 16px;
+                position: relative;
+                transition: all 0.3s ease;
+            }
+            .search-panel.mobile-collapsed {
+                max-height: 60px;
+                overflow: hidden;
+            }
+            .search-panel.mobile-collapsed .form-grid,
+            .search-panel.mobile-collapsed .btn-zoek,
+            .search-panel.mobile-collapsed .flight-section,
+            .search-panel.mobile-collapsed .accommodation-section {
+                display: none;
+            }
+            .mobile-toggle {
+                display: block !important;
+                width: 100%;
+                padding: 0.7rem;
+                background: #f8fafc;
+                border: 1px solid #e2e8f0;
+                border-radius: 10px;
+                cursor: pointer;
+                font-size: 0.95rem;
+                font-weight: 600;
+                color: #0083b0;
+                margin-top: 0.5rem;
+                transition: all 0.2s;
+                font-family: inherit;
+            }
+            .mobile-toggle:hover {
+                background: #e2e8f0;
+            }
+            .search-panel.mobile-collapsed .mobile-toggle {
+                margin-top: 0;
+            }
+            .search-panel:not(.mobile-collapsed) .mobile-toggle {
+                background: #00b4db;
+                color: white;
+            }
+            .search-panel h2 { font-size: 1.1rem; cursor: pointer; margin-bottom: 0.3rem; }
 
             .passagiers-display { font-size: 0.9rem; padding: 0.65rem 0.9rem; }
             .passagier-row { padding: 0.6rem 0; }
@@ -499,8 +539,11 @@
 
     <div class="main-layout">
     <div class="content-row">
-    <div class="search-panel">
-        <h2>&#128270; Waar wil je naartoe?</h2>
+    <div class="search-panel" id="searchPanel">
+        <h2 onclick="toggleSearchPanel()">&#128270; Waar wil je naartoe?</h2>
+        <button type="button" class="mobile-toggle" onclick="toggleSearchPanel()" style="display:none;">
+            <span id="toggleText">▲ Verberg zoekopdracht</span>
+        </button>
         <div class="form-grid">
             <div class="form-group">
                 <label><span class="label-icon">&#128100;</span> Passagiers</label>
@@ -1455,6 +1498,28 @@ var bestemmingen = [
     { naam: "Brno", land: "Tsjechië", vlag: "🇨🇿", reistijd: 1.5, lat: 49.19, lng: 16.61, temp: [0,1,6,11,16,19,22,21,17,11,5,1] }
 ];
 
+function toggleSearchPanel() {
+    var panel = document.getElementById('searchPanel');
+    var toggleText = document.getElementById('toggleText');
+
+    if (panel.classList.contains('mobile-collapsed')) {
+        panel.classList.remove('mobile-collapsed');
+        if (toggleText) toggleText.textContent = '▲ Verberg zoekopdracht';
+    } else {
+        panel.classList.add('mobile-collapsed');
+        if (toggleText) toggleText.textContent = '▼ Toon zoekopdracht';
+    }
+}
+
+function collapseSearchOnMobile() {
+    if (window.innerWidth <= 768) {
+        var panel = document.getElementById('searchPanel');
+        panel.classList.add('mobile-collapsed');
+        var toggleText = document.getElementById('toggleText');
+        if (toggleText) toggleText.textContent = '▼ Toon zoekopdracht';
+    }
+}
+
 function zoekBestemmingen() {
     resetAlles();
 
@@ -1559,6 +1624,8 @@ function zoekBestemmingen() {
     noResults.style.display = "none";
     header.style.display = "block";
     header.innerHTML = "<span>" + resultaten.length + " bestemming" + (resultaten.length !== 1 ? "en" : "") + " &bull; " + basisDagen + " dagen</span>";
+
+    collapseSearchOnMobile();
 
     var heeftFlex = flexVoor > 0 || flexNa > 0 || flexTerugVoor > 0 || flexTerugNa > 0;
 
