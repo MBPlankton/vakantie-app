@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vakantie Bestemming Zoeker</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, rgba(0,180,219,0.9), rgba(0,131,176,0.9));
+            padding: 3rem 2rem 4rem;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero h1 { font-size: 2.6rem; font-weight: 700; margin-bottom: 0.5rem; position: relative; text-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .hero h1 .icon { font-size: 2.8rem; vertical-align: middle; }
+        .hero p { font-size: 1.15rem; opacity: 0.9; font-weight: 300; position: relative; }
+
+        .main-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            max-width: 1400px;
+            margin: -2rem auto 2rem;
+            padding: 0 1.5rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .content-row {
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+        }
+
+        .results-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .search-panel {
+            flex: 0 0 520px;
+            background: white;
+            border-radius: 20px;
+            padding: 1.2rem 1.5rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .search-panel h2 { font-size: 1.2rem; color: #0083b0; margin-bottom: 0.8rem; font-weight: 600; }
+
+        .form-grid { display: flex; flex-direction: column; gap: 0.7rem; }
+
+        .datum-groep {
+            display: flex;
+            gap: 0.6rem;
+            background: #f8fafc;
+            padding: 0.8rem;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+        }
+        .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+        .form-group label { font-weight: 500; color: #555; font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem; }
+        .label-icon { font-size: 1.1rem; }
+        .form-group input { padding: 0.75rem 1rem; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 1rem; font-family: inherit; transition: all 0.2s; }
+        .form-group input:focus { outline: none; border-color: #00b4db; box-shadow: 0 0 0 3px rgba(0,180,219,0.1); }
+
+        .datum-flex-group { display: flex; flex-direction: column; gap: 0.4rem; flex: 1; }
+        .datum-flex-row { display: flex; align-items: center; gap: 0.4rem; }
+        .datum-flex-row input[type="date"] {
+            flex: 1;
+            min-width: 0;
+            padding: 0.6rem 0.8rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background: white;
+        }
+        .datum-flex-row input[type="date"]:focus {
+            outline: none;
+            border-color: #00b4db;
+            box-shadow: 0 0 0 2px rgba(0,180,219,0.1);
+        }
+        .datum-divider {
+            width: 12px;
+            height: 2px;
+            background: #94a3b8;
+            flex-shrink: 0;
+            margin: 0 0.2rem;
+        }
+        .datum-groep-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.2rem;
+        }
+
+        .flex-stepper-wrap { display: none; }
+        .flex-stepper { display: none; }
+        .flex-btn { display: none; }
+        .flex-value { display: none; }
+        .flex-stepper-label { display: none; }
+
+        .datum-range-label { display: none; }
+
+        .passagiers-selector { position: relative; }
+        .passagiers-display { padding: 0.75rem 1rem; border: 2px solid #e2e8f0; border-radius: 10px; background: white; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; }
+        .passagiers-display:hover { border-color: #00b4db; }
+        .dropdown-arrow { color: #64748b; font-size: 0.8rem; }
+
+        .passagiers-dropdown { position: absolute; top: 100%; left: 0; right: 0; margin-top: 0.5rem; background: white; border: 2px solid #e2e8f0; border-radius: 10px; padding: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: none; z-index: 100; }
+        .passagiers-dropdown.active { display: block; }
+
+        .passagier-row { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid #f1f5f9; }
+        .passagier-row:last-child { border-bottom: none; }
+
+        .passagier-label { flex: 1; }
+        .passagier-type { font-weight: 500; color: #1e293b; font-size: 0.95rem; }
+        .passagier-age { font-size: 0.8rem; color: #64748b; }
+
+        .passagier-controls { display: flex; align-items: center; gap: 1rem; }
+        .passagier-btn { background: white; border: 2px solid #e2e8f0; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1.1rem; font-weight: 600; color: #0083b0; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .passagier-btn:hover { background: #00b4db; color: white; border-color: #00b4db; }
+        .passagier-btn:disabled { background: #f8fafc; color: #cbd5e0; border-color: #e2e8f0; cursor: not-allowed; }
+        .passagier-aantal { font-weight: 600; color: #1e293b; min-width: 20px; text-align: center; }
+
+        .btn-zoek { width: 100%; padding: 0.8rem; background: linear-gradient(135deg, #00b4db, #0083b0); color: white; border: none; border-radius: 12px; font-size: 1.05rem; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 15px rgba(0,180,219,0.4); font-family: inherit; margin-top: 0.8rem; }
+        .btn-zoek:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,180,219,0.5); }
+        .btn-zoek:active { transform: translateY(0); }
+        .btn-zoek:disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; box-shadow: none; }
+
+        .results-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            min-height: 600px;
+            max-height: 600px;
+            transition: all 0.3s ease;
+        }
+        .results-section.compact {
+            min-height: 300px;
+            max-height: 300px;
+        }
+        .results-section.compact .result-stats {
+            display: none;
+        }
+        .results-section.compact .result-row {
+            padding: 0.6rem 1rem;
+        }
+        .results-section.filtered {
+            min-height: auto;
+            max-height: 120px;
+        }
+
+        .results-header { padding: 1.2rem 1.5rem; background: linear-gradient(135deg, #00b4db, #0083b0); color: white; font-weight: 600; font-size: 1rem; display: none; }
+
+        .welcome-msg {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            padding: 3rem;
+        }
+        .welcome-icon { font-size: 4rem; margin-bottom: 1rem; opacity: 0.5; }
+        .welcome-msg p { text-align: center; font-size: 1.1rem; line-height: 1.6; }
+
+        .no-results {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            padding: 3rem;
+        }
+        .no-icon { font-size: 4rem; margin-bottom: 1rem; }
+        .no-results h3 { color: #64748b; margin-bottom: 0.5rem; }
+        .no-results p { text-align: center; }
+
+        .results-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .result-row {
+            background: white;
+            border: 2px solid #f1f5f9;
+            border-radius: 12px;
+            padding: 1rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+            animation: slideIn 0.4s ease-out;
+            animation-fill-mode: both;
+        }
+        .result-row:hover { border-color: #00b4db; box-shadow: 0 4px 12px rgba(0,180,219,0.15); transform: translateX(4px); }
+        .result-row.selected { border-color: #00b4db; background: #f0f9ff; box-shadow: 0 4px 12px rgba(0,180,219,0.2); }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .temp-bar { position: absolute; left: 0; top: 0; bottom: 0; width: 5px; }
+        .bar-cold { background: linear-gradient(180deg, #60a5fa, #3b82f6); }
+        .bar-mild { background: linear-gradient(180deg, #fbbf24, #f59e0b); }
+        .bar-warm { background: linear-gradient(180deg, #fb923c, #f97316); }
+        .bar-hot { background: linear-gradient(180deg, #f87171, #ef4444); }
+
+        .result-info { flex: 1; display: flex; flex-direction: column; gap: 0.3rem; }
+        .result-name { font-weight: 600; font-size: 1.05rem; color: #1e293b; }
+        .result-sub { font-size: 0.85rem; color: #64748b; display: none; }
+
+        .flex-indicator { display: inline-block; margin-left: 0.5rem; padding: 0.15rem 0.5rem; background: #dbeafe; color: #1e40af; border-radius: 6px; font-size: 0.75rem; font-weight: 600; }
+
+        .result-stats { display: flex; gap: 1.2rem; align-items: center; }
+        .result-stat { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; }
+        .result-stat-val { font-weight: 700; font-size: 1.1rem; color: #1e293b; }
+        .result-stat-label { font-size: 0.65rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.3px; font-weight: 600; }
+        .result-netto .result-stat-val { color: #059669; }
+
+        .temp-cold { color: #3b82f6 !important; }
+        .temp-mild { color: #f59e0b !important; }
+        .temp-warm { color: #f97316 !important; }
+        .temp-hot { color: #ef4444 !important; }
+
+        .flight-section { margin-top: 0.8rem; padding-top: 0.8rem; border-top: 2px solid #f1f5f9; }
+        .flight-section h3 { font-size: 1rem; color: #0083b0; margin-bottom: 0.6rem; font-weight: 600; }
+
+        .accommodation-section { margin-top: 0.8rem; padding-top: 0.8rem; border-top: 2px solid #f1f5f9; }
+        .accommodation-section h3 { font-size: 1rem; color: #0083b0; margin-bottom: 0.6rem; font-weight: 600; }
+
+        .accommodation-options { display: flex; gap: 0.6rem; margin-bottom: 0; }
+        .accommodation-option { display: flex; align-items: center; gap: 0.4rem; padding: 0.6rem 1rem; border: 2px solid #e2e8f0; border-radius: 10px; cursor: pointer; transition: all 0.2s; background: white; flex: 1; justify-content: center; }
+        .accommodation-option:hover { border-color: #00b4db; background: #f0f9ff; }
+        .accommodation-option input[type="checkbox"] { cursor: pointer; width: 18px; height: 18px; accent-color: #0083b0; }
+        .accommodation-option input[type="checkbox"]:checked + span { font-weight: 600; color: #0083b0; }
+        .accommodation-option:has(input[type="checkbox"]:checked) { border-color: #00b4db; background: #f0f9ff; }
+
+        .flight-row { display: flex; align-items: center; gap: 0.7rem; }
+        .flight-field { flex: 1; display: flex; flex-direction: column; gap: 0.35rem; }
+        .flight-field label { font-weight: 500; color: #555; font-size: 0.95rem; }
+        .flight-field select { padding: 0.75rem 1rem; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 1rem; font-family: inherit; cursor: pointer; appearance: none;
+            background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 1rem center;
+        }
+        .flight-field select:focus { outline: none; border-color: #00b4db; box-shadow: 0 0 0 3px rgba(0,180,219,0.1); }
+        .flight-field select:disabled { background-color: #f8fafc; color: #94a3b8; cursor: not-allowed; }
+
+        .flight-swap { background: white; border: 2px solid #e2e8f0; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s; color: #0083b0; flex-shrink: 0; margin-top: 1.8rem; }
+        .flight-swap:hover { background: #00b4db; color: white; border-color: #00b4db; transform: rotate(180deg); }
+
+        .flights-results {
+            display: none;
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+        }
+        .flights-results.active { display: block; }
+        .flights-results h3 { font-size: 1.2rem; color: #0083b0; margin-bottom: 1rem; font-weight: 600; }
+
+        .accommodations-results {
+            display: none;
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+        }
+        .accommodations-results.active { display: block; }
+        .accommodations-results h3 { font-size: 1.2rem; color: #0083b0; margin-bottom: 1rem; font-weight: 600; }
+
+        .booking-section {
+            display: none;
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+        }
+        .booking-section.active { display: block; }
+        .booking-section h3 { font-size: 1.2rem; color: #0083b0; margin-bottom: 1rem; font-weight: 600; }
+
+        .summary-content {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .summary-item:last-child { border-bottom: none; }
+        .summary-item.total {
+            border-top: 2px solid #0083b0;
+            margin-top: 0.5rem;
+            padding-top: 0.75rem;
+        }
+        .summary-label { color: #64748b; font-size: 0.9rem; font-weight: 500; }
+        .summary-value { color: #1e293b; font-size: 0.9rem; font-weight: 600; }
+        .summary-item.total .summary-label { color: #0083b0; font-weight: 700; font-size: 1rem; }
+        .summary-item.total .summary-value { color: #0083b0; font-weight: 700; font-size: 1.1rem; }
+
+        .flight-combo {
+            background: white;
+            border: 2px solid #f1f5f9;
+            border-radius: 8px;
+            padding: 0.5rem 0.6rem;
+            margin-bottom: 0.35rem;
+            transition: all 0.2s;
+        }
+        .flight-combo:hover { border-color: #00b4db; box-shadow: 0 4px 12px rgba(0,180,219,0.15); cursor: pointer; }
+        .flight-combo.selected { border-color: #00b4db; background: #f0f9ff; box-shadow: 0 4px 12px rgba(0,180,219,0.2); }
+
+        .flight-combo-header { display: flex; justify-content: flex-end; align-items: center; margin-bottom: 0.35rem; padding-bottom: 0.35rem; border-bottom: 1px solid #f1f5f9; }
+        .flight-combo-price { font-size: 1.1rem; font-weight: 700; color: #0083b0; text-align: right; }
+        .flight-combo-price-label { font-size: 0.6rem; color: #64748b; text-align: right; }
+
+        .flight-leg { display: flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0; }
+        .flight-leg:not(:last-child) { border-bottom: 1px dashed #e2e8f0; margin-bottom: 0.3rem; padding-bottom: 0.3rem; }
+
+        .flight-leg-label { flex: 0 0 55px; font-size: 0.65rem; font-weight: 600; color: #64748b; }
+
+        .flight-airline-info { flex: 0 0 75px; }
+        .flight-airline-name { font-weight: 600; font-size: 0.7rem; color: #1e293b; }
+        .flight-airline-code { font-size: 0.6rem; color: #94a3b8; }
+
+        .flight-times { flex: 1; display: flex; align-items: center; gap: 0.6rem; }
+        .flight-time { font-size: 0.8rem; font-weight: 600; color: #1e293b; }
+        .flight-duration { flex: 1; text-align: center; font-size: 0.65rem; color: #64748b; }
+        .flight-arrow { color: #cbd5e0; }
+
+        .flight-stops { flex: 0 0 45px; font-size: 0.65rem; color: #64748b; text-align: center; }
+        .flight-stops.direct { color: #059669; font-weight: 600; }
+
+        .accommodation-card {
+            background: white;
+            border: 2px solid #f1f5f9;
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .accommodation-card:hover { border-color: #00b4db; box-shadow: 0 4px 12px rgba(0,180,219,0.15); }
+        .accommodation-card.selected { border-color: #00b4db; background: #f0f9ff; box-shadow: 0 4px 12px rgba(0,180,219,0.2); }
+
+        .accommodation-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
+        .accommodation-info { flex: 1; }
+        .accommodation-name { font-weight: 600; font-size: 0.95rem; color: #1e293b; margin-bottom: 0.2rem; }
+        .accommodation-type { font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+        .accommodation-rating { color: #f59e0b; font-size: 0.75rem; }
+
+        .accommodation-price { text-align: right; }
+        .accommodation-total { font-size: 1.2rem; font-weight: 700; color: #0083b0; }
+        .accommodation-per-night { font-size: 0.65rem; color: #64748b; }
+
+        .accommodation-details { display: flex; gap: 1rem; padding-top: 0.5rem; border-top: 1px solid #f1f5f9; }
+        .accommodation-detail { font-size: 0.7rem; color: #64748b; }
+        .accommodation-detail strong { color: #1e293b; font-weight: 600; }
+
+        .btn-book {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(16,185,129,0.4);
+            font-family: inherit;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn-book:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16,185,129,0.5); }
+        .btn-book:active { transform: translateY(0); }
+
+        .footer { text-align: center; padding: 2rem; color: rgba(255,255,255,0.6); font-size: 0.9rem; }
+
+        @media (max-width: 1024px) {
+            .main-layout { flex-direction: column; }
+            .search-panel { flex: 0 0 auto; width: 100%; max-width: 600px; margin: 0 auto; }
+            .results-section { min-height: 500px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hero">
+        <h1><span class="icon">&#9992;</span> Vakantie Bestemming Zoeker</h1>
+        <p>Vind jouw perfecte vakantiebestemming op basis van datum en gewenste temperatuur</p>
+    </div>
+
+    <div class="main-layout">
+    <div class="content-row">
+    <div class="search-panel">
+        <h2>&#128270; Waar wil je naartoe?</h2>
+        <div class="form-grid">
+            <div class="form-group">
+                <label><span class="label-icon">&#128100;</span> Passagiers</label>
+                <div class="passagiers-selector" id="passagiersSelector">
+                    <div class="passagiers-display" onclick="togglePassagiers()">
+                        <span id="passagiersText">1 volwassene</span>
+                        <span class="dropdown-arrow">&#9662;</span>
+                    </div>
+                    <div class="passagiers-dropdown" id="passagiersDropdown">
+                        <div class="passagier-row">
+                            <div class="passagier-label">
+                                <div class="passagier-type">Volwassenen</div>
+                                <div class="passagier-age">18+ jaar</div>
+                            </div>
+                            <div class="passagier-controls">
+                                <button type="button" class="passagier-btn" onclick="wijzigPassagiers('volwassenen', -1)">-</button>
+                                <span class="passagier-aantal" id="aantalVolwassenen">1</span>
+                                <button type="button" class="passagier-btn" onclick="wijzigPassagiers('volwassenen', 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="passagier-row">
+                            <div class="passagier-label">
+                                <div class="passagier-type">Kinderen</div>
+                                <div class="passagier-age">2-17 jaar</div>
+                            </div>
+                            <div class="passagier-controls">
+                                <button type="button" class="passagier-btn" onclick="wijzigPassagiers('kinderen', -1)">-</button>
+                                <span class="passagier-aantal" id="aantalKinderen">0</span>
+                                <button type="button" class="passagier-btn" onclick="wijzigPassagiers('kinderen', 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="passagier-row">
+                            <div class="passagier-label">
+                                <div class="passagier-type">Baby's</div>
+                                <div class="passagier-age">&lt;2 jaar</div>
+                            </div>
+                            <div class="passagier-controls">
+                                <button type="button" class="passagier-btn" onclick="wijzigPassagiers('babies', -1)">-</button>
+                                <span class="passagier-aantal" id="aantalBabies">0</span>
+                                <button type="button" class="passagier-btn" onclick="wijzigPassagiers('babies', 1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label><span class="label-icon">&#128197;</span> Reisdata</label>
+                <div class="datum-groep">
+                    <div class="datum-flex-group">
+                        <div class="datum-groep-label">Vertrek</div>
+                        <input type="date" id="vertrekdatum">
+                    </div>
+                    <div class="datum-flex-group">
+                        <div class="datum-groep-label">Terugreis</div>
+                        <input type="date" id="terugdatum">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label><span class="label-icon">&#127777;</span> Min. temperatuur (&#176;C)</label>
+                <input type="number" id="minTemp" min="-10" max="45" step="1" value="15" placeholder="bijv. 20">
+            </div>
+            <div class="form-group">
+                <label><span class="label-icon">&#9992;</span> Max. reisduur (uren)</label>
+                <input type="number" id="maxReisduur" min="1" max="12" step="0.5" value="5" placeholder="bijv. 5">
+            </div>
+        </div>
+
+        <button type="button" class="btn-zoek" onclick="zoekBestemmingen()">&#128269; Zoek bestemmingen</button>
+
+        <div class="flight-section">
+            <h3>&#9992; Vliegtuig</h3>
+            <div class="flight-row">
+                <div class="flight-field">
+                    <label>Van</label>
+                    <select id="vliegveldVan">
+                        <option value="AMS">Amsterdam Schiphol (AMS)</option>
+                        <option value="EIN">Eindhoven Airport (EIN)</option>
+                        <option value="RTM">Rotterdam The Hague (RTM)</option>
+                        <option value="GRQ">Groningen Eelde (GRQ)</option>
+                        <option value="MST">Maastricht Aachen (MST)</option>
+                    </select>
+                </div>
+                <button type="button" class="flight-swap" onclick="swapVliegvelden()" title="Omwisselen">&#8652;</button>
+                <div class="flight-field">
+                    <label>Naar</label>
+                    <select id="vliegveldNaar" disabled>
+                        <option value="">Land, stad of luchthaven</option>
+                    </select>
+                </div>
+            </div>
+            <button type="button" class="btn-zoek" onclick="zoekVluchten()" style="margin-top:0.6rem" id="btnZoekVluchten" disabled>&#9992; Zoek vluchten</button>
+        </div>
+
+        <div class="accommodation-section" id="accommodationSection">
+            <h3>&#127969; Accommodatie</h3>
+            <div class="accommodation-options">
+                <label class="accommodation-option">
+                    <input type="checkbox" name="accommodationType" value="hotel" checked>
+                    <span>Hotel</span>
+                </label>
+                <label class="accommodation-option">
+                    <input type="checkbox" name="accommodationType" value="appartement">
+                    <span>Appartement</span>
+                </label>
+                <label class="accommodation-option">
+                    <input type="checkbox" name="accommodationType" value="villa">
+                    <span>Villa</span>
+                </label>
+            </div>
+            <button type="button" class="btn-zoek" onclick="zoekAccommodatie()" style="margin-top:0.6rem" id="btnZoekAccommodatie" disabled>&#128270; Zoek accommodatie</button>
+        </div>
+    </div>
+
+    <div class="results-column">
+        <div class="results-section">
+            <div class="results-header" id="resultsHeader"></div>
+            <div class="welcome-msg" id="welcomeMsg">
+                <div class="welcome-icon">&#127796;</div>
+                <p>Klik op <strong>Zoek bestemmingen</strong><br>om resultaten te zien.</p>
+            </div>
+            <div class="no-results" id="noResults">
+                <div class="no-icon">&#128533;</div>
+                <h3>Geen bestemmingen gevonden</h3>
+                <p>Probeer andere datums, lagere temperatuur of meer flexibiliteit.</p>
+            </div>
+            <div class="results-list" id="resultsList"></div>
+        </div>
+
+        <div class="flights-results" id="flightsResults">
+            <h3>&#9992; Beschikbare vluchten</h3>
+            <div id="flightsList"></div>
+        </div>
+
+        <div class="accommodations-results" id="accommodationsResults">
+            <h3>&#127969; Beschikbare accommodaties</h3>
+            <div id="accommodationsList"></div>
+        </div>
+
+        <div class="booking-section" id="bookingSection">
+            <h3>&#128203; Samenvatting</h3>
+            <div class="summary-content">
+                <div class="summary-item">
+                    <span class="summary-label">Aantal personen</span>
+                    <span class="summary-value" id="summaryPersonen"></span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Reisperiode</span>
+                    <span class="summary-value" id="summaryDatums"></span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label" id="summaryVlucht"></span>
+                    <span class="summary-value" id="summaryVluchtPrijs"></span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label" id="summaryAccommodatie"></span>
+                    <span class="summary-value" id="summaryAccommodatiePrijs"></span>
+                </div>
+                <div class="summary-item total">
+                    <span class="summary-label">Totaal</span>
+                    <span class="summary-value" id="summaryTotaal"></span>
+                </div>
+            </div>
+            <button type="button" class="btn-book" id="btnBook" onclick="boekReis()">&#10004; Book</button>
+        </div>
+    </div>
+    </div>
+
+    <div class="footer">
+        Vakantie Bestemming Zoeker &mdash; Temperaturen zijn gemiddelden en kunnen per jaar vari&euml;ren.
+    </div>
+
+<script>
+var flexVoor = 0;
+var flexNa = 0;
+var flexTerugVoor = 0;
+var flexTerugNa = 0;
+
+var aantalVolwassenen = 1;
+var aantalKinderen = 0;
+var aantalBabies = 0;
+
+var vandaag = new Date();
+document.getElementById("vertrekdatum").value = vandaag.toISOString().split("T")[0];
+var overWeek = new Date();
+overWeek.setDate(overWeek.getDate() + 7);
+document.getElementById("terugdatum").value = overWeek.toISOString().split("T")[0];
+
+document.getElementById("vertrekdatum").addEventListener("change", function() {
+    var vertrekDatum = new Date(this.value + "T00:00:00");
+    var terugDatum = new Date(vertrekDatum);
+    terugDatum.setDate(terugDatum.getDate() + 8);
+    document.getElementById("terugdatum").value = terugDatum.toISOString().split("T")[0];
+    updateAlleRanges();
+});
+document.getElementById("terugdatum").addEventListener("change", updateAlleRanges);
+
+function wijzigFlex(richting, delta) {
+    if (richting === "voor") flexVoor = Math.max(0, Math.min(7, flexVoor + delta));
+    else if (richting === "na") flexNa = Math.max(0, Math.min(7, flexNa + delta));
+    else if (richting === "terugVoor") flexTerugVoor = Math.max(0, Math.min(7, flexTerugVoor + delta));
+    else if (richting === "terugNa") flexTerugNa = Math.max(0, Math.min(7, flexTerugNa + delta));
+
+    var elId = richting === "voor" ? "flexVoorValue" : richting === "na" ? "flexNaValue" : richting === "terugVoor" ? "flexTerugVoorValue" : "flexTerugNaValue";
+    var val = richting === "voor" ? flexVoor : richting === "na" ? flexNa : richting === "terugVoor" ? flexTerugVoor : flexTerugNa;
+    var el = document.getElementById(elId);
+    el.textContent = val;
+    el.className = "flex-value" + (val === 0 ? " is-zero" : "");
+    updateAlleRanges();
+}
+
+function updateAlleRanges() {
+    updateRange("vertrekdatum", flexVoor, flexNa, "datumRangeLabel");
+    updateRange("terugdatum", flexTerugVoor, flexTerugNa, "terugRangeLabel");
+}
+
+function updateRange(inputId, voor, na, labelId) {
+    var label = document.getElementById(labelId);
+    var input = document.getElementById(inputId).value;
+    if (!input || (voor === 0 && na === 0)) {
+        label.textContent = "";
+        return;
+    }
+    var basis = new Date(input + "T00:00:00");
+    var vroegst = new Date(basis);
+    vroegst.setDate(vroegst.getDate() - voor);
+    var laatst = new Date(basis);
+    laatst.setDate(laatst.getDate() + na);
+    label.textContent = "Venster: " + formatDatum(vroegst) + " – " + formatDatum(laatst);
+}
+
+function formatDatum(datum) {
+    return datum.toLocaleDateString("nl-NL", { day: "numeric", month: "long" });
+}
+
+function formatDatumKort(datum) {
+    return datum.toLocaleDateString("nl-NL", { day: "numeric", month: "short" });
+}
+
+function dagenTussen(d1, d2) {
+    return Math.round((d2 - d1) / 86400000) + 1;
+}
+
+function swapVliegvelden() {
+    var van = document.getElementById("vliegveldVan");
+    var naar = document.getElementById("vliegveldNaar");
+    var vanVal = van.value;
+    var naarVal = naar.value;
+    if (!naarVal) return;
+    var temp = vanVal;
+    van.value = naarVal;
+    naar.value = temp;
+}
+
+function togglePassagiers() {
+    var dropdown = document.getElementById("passagiersDropdown");
+    dropdown.classList.toggle("active");
+}
+
+function wijzigPassagiers(type, delta) {
+    if (type === "volwassenen") {
+        aantalVolwassenen = Math.max(1, Math.min(9, aantalVolwassenen + delta));
+        document.getElementById("aantalVolwassenen").textContent = aantalVolwassenen;
+    } else if (type === "kinderen") {
+        aantalKinderen = Math.max(0, Math.min(9, aantalKinderen + delta));
+        document.getElementById("aantalKinderen").textContent = aantalKinderen;
+    } else if (type === "babies") {
+        aantalBabies = Math.max(0, Math.min(9, aantalBabies + delta));
+        document.getElementById("aantalBabies").textContent = aantalBabies;
+    }
+    updatePassagiersText();
+}
+
+function updatePassagiersText() {
+    var totaal = aantalVolwassenen + aantalKinderen + aantalBabies;
+    var text = "";
+
+    if (aantalVolwassenen > 0) {
+        text += aantalVolwassenen + (aantalVolwassenen === 1 ? " volwassene" : " volwassenen");
+    }
+    if (aantalKinderen > 0) {
+        text += (text ? ", " : "") + aantalKinderen + (aantalKinderen === 1 ? " kind" : " kinderen");
+    }
+    if (aantalBabies > 0) {
+        text += (text ? ", " : "") + aantalBabies + (aantalBabies === 1 ? " baby" : " baby's");
+    }
+
+    document.getElementById("passagiersText").textContent = text;
+}
+
+document.addEventListener("click", function(e) {
+    var selector = document.getElementById("passagiersSelector");
+    if (selector && !selector.contains(e.target)) {
+        document.getElementById("passagiersDropdown").classList.remove("active");
+    }
+});
+
+var geselecteerdeBestemming = null;
+var geselecteerdeVlucht = null;
+var geselecteerdeAccommodatie = null;
+
+function selectBestemming(bestemming, rowEl) {
+    geselecteerdeBestemming = bestemming;
+
+    var rows = document.querySelectorAll(".result-row");
+    for (var i = 0; i < rows.length; i++) {
+        rows[i].classList.remove("selected");
+    }
+    rowEl.classList.add("selected");
+
+    var naar = document.getElementById("vliegveldNaar");
+    naar.innerHTML = "";
+
+    var opt = document.createElement("option");
+    opt.value = bestemming.naam;
+    opt.textContent = bestemming.vlag + " " + bestemming.naam + ", " + bestemming.land;
+    naar.appendChild(opt);
+
+    naar.value = bestemming.naam;
+    naar.disabled = false;
+
+    document.getElementById("btnZoekVluchten").disabled = false;
+    document.getElementById("btnZoekAccommodatie").disabled = false;
+}
+
+var airlines = [
+    { code: "KL", naam: "KLM", kleur: "#00A1DE" },
+    { code: "HV", naam: "Transavia", kleur: "#00B140" },
+    { code: "U2", naam: "easyJet", kleur: "#FF6600" },
+    { code: "FR", naam: "Ryanair", kleur: "#073590" },
+    { code: "VY", naam: "Vueling", kleur: "#FFCC00" },
+    { code: "OR", naam: "TUI fly", kleur: "#CC0033" },
+    { code: "LH", naam: "Lufthansa", kleur: "#05164D" }
+];
+
+function genereerVluchten(van, naar, aantalVluchten) {
+    var vluchten = [];
+    var basisPrijs = 150 + Math.floor(Math.random() * 200);
+
+    for (var i = 0; i < aantalVluchten; i++) {
+        var airline = airlines[Math.floor(Math.random() * airlines.length)];
+        var vertrekUur = 6 + Math.floor(Math.random() * 16);
+        var vertrekMin = Math.floor(Math.random() * 4) * 15;
+        var vluchtDuur = 2 + Math.floor(Math.random() * 4);
+        var aankomstUur = (vertrekUur + vluchtDuur) % 24;
+        var aankomstMin = (vertrekMin + Math.floor(Math.random() * 60)) % 60;
+        var isDirect = Math.random() > 0.3;
+        var prijs = basisPrijs + Math.floor(Math.random() * 150) - 50;
+
+        if (!isDirect) {
+            vluchtDuur += 2;
+            prijs -= 30;
+        }
+
+        vluchten.push({
+            airline: airline,
+            vertrekTijd: formatTijd(vertrekUur, vertrekMin),
+            aankomstTijd: formatTijd(aankomstUur, aankomstMin),
+            duur: vluchtDuur + "u " + Math.floor(Math.random() * 60) + "m",
+            isDirect: isDirect,
+            prijs: prijs
+        });
+    }
+
+    return vluchten.sort(function(a, b) { return a.prijs - b.prijs; });
+}
+
+function formatTijd(uur, min) {
+    return (uur < 10 ? "0" : "") + uur + ":" + (min < 10 ? "0" : "") + min;
+}
+
+function zoekVluchten() {
+    var van = document.getElementById("vliegveldVan").value;
+    var naar = document.getElementById("vliegveldNaar").value;
+
+    if (!naar) {
+        alert("Selecteer eerst een bestemming uit de lijst.");
+        return;
+    }
+
+    var heenVluchten = genereerVluchten(van, naar, 3);
+    var terugVluchten = genereerVluchten(naar, van, 3);
+    var flightsList = document.getElementById("flightsList");
+    flightsList.innerHTML = "";
+
+    for (var i = 0; i < heenVluchten.length; i++) {
+        for (var j = 0; j < terugVluchten.length; j++) {
+            var heen = heenVluchten[i];
+            var terug = terugVluchten[j];
+            var totaalPrijs = heen.prijs + terug.prijs;
+
+            var combo = document.createElement("div");
+            combo.className = "flight-combo";
+            combo.onclick = (function(comboElement, heenVlucht, terugVlucht, totaal) {
+                return function() {
+                    var allCombos = document.querySelectorAll(".flight-combo");
+                    for (var k = 0; k < allCombos.length; k++) {
+                        allCombos[k].classList.remove("selected");
+                    }
+                    comboElement.classList.add("selected");
+                    geselecteerdeVlucht = {
+                        heen: heenVlucht,
+                        terug: terugVlucht,
+                        totaalPrijs: totaal
+                    };
+                };
+            })(combo, heen, terug, totaalPrijs);
+
+            combo.ondblclick = (function(comboElement, heenVlucht, terugVlucht, totaal) {
+                return function() {
+                    var allCombos = document.querySelectorAll(".flight-combo");
+                    for (var k = 0; k < allCombos.length; k++) {
+                        allCombos[k].classList.remove("selected");
+                        if (allCombos[k] !== comboElement) {
+                            allCombos[k].style.display = "none";
+                        }
+                    }
+                    comboElement.classList.add("selected");
+                    geselecteerdeVlucht = {
+                        heen: heenVlucht,
+                        terug: terugVlucht,
+                        totaalPrijs: totaal
+                    };
+                    zoekAccommodatie();
+                };
+            })(combo, heen, terug, totaalPrijs);
+            combo.innerHTML =
+                '<div class="flight-combo-header">' +
+                    '<div>' +
+                        '<div class="flight-combo-price">€' + totaalPrijs + '</div>' +
+                        '<div class="flight-combo-price-label">totaal voor ' + aantalVolwassenen + (aantalVolwassenen === 1 ? ' persoon' : ' personen') + '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="flight-leg">' +
+                    '<div class="flight-leg-label">Heenvlucht</div>' +
+                    '<div class="flight-airline-info">' +
+                        '<div class="flight-airline-name" style="color:' + heen.airline.kleur + '">' + heen.airline.naam + '</div>' +
+                        '<div class="flight-airline-code">' + heen.airline.code + ' ' + (1000 + Math.floor(Math.random() * 9000)) + '</div>' +
+                    '</div>' +
+                    '<div class="flight-times">' +
+                        '<div class="flight-time">' + heen.vertrekTijd + '</div>' +
+                        '<div class="flight-duration">' + heen.duur + ' <span class="flight-arrow">→</span></div>' +
+                        '<div class="flight-time">' + heen.aankomstTijd + '</div>' +
+                    '</div>' +
+                    '<div class="flight-stops' + (heen.isDirect ? ' direct' : '') + '">' + (heen.isDirect ? 'Direct' : '1 stop') + '</div>' +
+                '</div>' +
+                '<div class="flight-leg">' +
+                    '<div class="flight-leg-label">Terugvlucht</div>' +
+                    '<div class="flight-airline-info">' +
+                        '<div class="flight-airline-name" style="color:' + terug.airline.kleur + '">' + terug.airline.naam + '</div>' +
+                        '<div class="flight-airline-code">' + terug.airline.code + ' ' + (1000 + Math.floor(Math.random() * 9000)) + '</div>' +
+                    '</div>' +
+                    '<div class="flight-times">' +
+                        '<div class="flight-time">' + terug.vertrekTijd + '</div>' +
+                        '<div class="flight-duration">' + terug.duur + ' <span class="flight-arrow">→</span></div>' +
+                        '<div class="flight-time">' + terug.aankomstTijd + '</div>' +
+                    '</div>' +
+                    '<div class="flight-stops' + (terug.isDirect ? ' direct' : '') + '">' + (terug.isDirect ? 'Direct' : '1 stop') + '</div>' +
+                '</div>';
+
+            flightsList.appendChild(combo);
+        }
+    }
+
+    filterBestemmingen();
+
+    document.querySelector(".results-section").classList.add("compact");
+    document.getElementById("flightsResults").classList.add("active");
+    document.getElementById("flightsResults").scrollIntoView({ behavior: "smooth" });
+}
+
+function filterBestemmingen() {
+    if (!geselecteerdeBestemming) return;
+
+    var rows = document.querySelectorAll(".result-row");
+    for (var i = 0; i < rows.length; i++) {
+        rows[i].style.display = "none";
+    }
+
+    var selectedRow = document.querySelector(".result-row.selected");
+    if (selectedRow) {
+        selectedRow.style.display = "flex";
+    }
+
+    document.getElementById("resultsHeader").style.display = "none";
+    document.querySelector(".results-section").classList.add("filtered");
+}
+
+function resetAlles() {
+    geselecteerdeBestemming = null;
+    geselecteerdeVlucht = null;
+    geselecteerdeAccommodatie = null;
+
+    var rows = document.querySelectorAll(".result-row");
+    for (var i = 0; i < rows.length; i++) {
+        rows[i].style.display = "flex";
+        rows[i].classList.remove("selected");
+    }
+
+    document.querySelector(".results-section").classList.remove("compact");
+    document.querySelector(".results-section").classList.remove("filtered");
+    document.getElementById("flightsResults").classList.remove("active");
+    document.getElementById("accommodationsResults").classList.remove("active");
+    document.getElementById("resultsHeader").style.display = "block";
+
+    var naar = document.getElementById("vliegveldNaar");
+    naar.innerHTML = '<option value="">Land, stad of luchthaven</option>';
+    naar.disabled = true;
+
+    document.getElementById("btnZoekVluchten").disabled = true;
+    document.getElementById("btnZoekAccommodatie").disabled = true;
+
+    document.getElementById("flightsList").innerHTML = "";
+    document.getElementById("accommodationsList").innerHTML = "";
+    document.getElementById("bookingSection").classList.remove("active");
+}
+
+function updateSamenvatting() {
+    var totaalPersonen = aantalVolwassenen + aantalKinderen + aantalBabies;
+    var personenText = "";
+    if (aantalVolwassenen > 0) {
+        personenText += aantalVolwassenen + (aantalVolwassenen === 1 ? " volwassene" : " volwassenen");
+    }
+    if (aantalKinderen > 0) {
+        personenText += (personenText ? ", " : "") + aantalKinderen + (aantalKinderen === 1 ? " kind" : " kinderen");
+    }
+    if (aantalBabies > 0) {
+        personenText += (personenText ? ", " : "") + aantalBabies + (aantalBabies === 1 ? " baby" : " baby's");
+    }
+
+    var vertrekDatum = new Date(document.getElementById("vertrekdatum").value + "T00:00:00");
+    var terugDatum = new Date(document.getElementById("terugdatum").value + "T00:00:00");
+
+    var datumsText = vertrekDatum.toLocaleDateString("nl-NL", { day: "numeric", month: "short" }) +
+                     " - " +
+                     terugDatum.toLocaleDateString("nl-NL", { day: "numeric", month: "short", year: "numeric" });
+
+    document.getElementById("summaryPersonen").textContent = personenText;
+    document.getElementById("summaryDatums").textContent = datumsText;
+
+    var totaal = 0;
+
+    if (geselecteerdeVlucht) {
+        var vluchtText = "Vlucht " + geselecteerdeVlucht.heen.airline.naam + " retour";
+        document.getElementById("summaryVlucht").textContent = vluchtText;
+        document.getElementById("summaryVluchtPrijs").textContent = "\u20AC" + geselecteerdeVlucht.totaalPrijs;
+        totaal += geselecteerdeVlucht.totaalPrijs;
+    }
+
+    if (geselecteerdeAccommodatie) {
+        var accType = geselecteerdeAccommodatie.type === "hotel" ? "Hotel" : geselecteerdeAccommodatie.type === "appartement" ? "Appartement" : "Villa";
+        var accText = accType + " " + geselecteerdeAccommodatie.naam;
+        document.getElementById("summaryAccommodatie").textContent = accText;
+        document.getElementById("summaryAccommodatiePrijs").textContent = "\u20AC" + geselecteerdeAccommodatie.totaalPrijs;
+        totaal += geselecteerdeAccommodatie.totaalPrijs;
+    }
+
+    document.getElementById("summaryTotaal").textContent = "\u20AC" + totaal;
+}
+
+function boekReis() {
+    alert("Bedankt voor je boeking!\n\nJe reis is gereserveerd. Je ontvangt binnenkort een bevestigingsmail met alle details.");
+}
+
+var hotelNamen = [
+    "Grand Hotel", "Beach Resort", "City Palace", "Ocean View", "Sunset Hotel",
+    "Paradise Inn", "Royal Suites", "Blue Bay Hotel", "Golden Coast", "Marina Hotel"
+];
+var appartementNamen = [
+    "Sea View Apartments", "City Center Flats", "Coastal Residence", "Palm Apartments",
+    "Sunny Flats", "Harbor Apartments", "Downtown Studios", "Beach Apartments"
+];
+var villaNamen = [
+    "Villa Sunset", "Casa Grande", "Villa Paradise", "Ocean Villa", "Luxury Villa",
+    "Villa Bella Vista", "Mediterranean Villa", "Villa Serenity"
+];
+
+function genereerAccommodaties(types, aantalPersonen, aantalNachten) {
+    var accommodaties = [];
+    var seed = Math.floor(Math.random() * 1000);
+
+    for (var i = 0; i < types.length; i++) {
+        var type = types[i];
+        var namen = type === "hotel" ? hotelNamen : type === "appartement" ? appartementNamen : villaNamen;
+        var aantalPerType = type === "hotel" ? 4 : 3;
+
+        for (var j = 0; j < aantalPerType; j++) {
+            var naamIndex = (seed + j) % namen.length;
+            var naam = namen[naamIndex];
+
+            var basisPrijs;
+            if (type === "hotel") {
+                basisPrijs = 60 + Math.floor(Math.random() * 80);
+            } else if (type === "appartement") {
+                basisPrijs = 40 + Math.floor(Math.random() * 60);
+            } else {
+                basisPrijs = 100 + Math.floor(Math.random() * 150);
+            }
+
+            var prijsPerNacht = Math.ceil(basisPrijs * aantalPersonen * 0.8);
+            var totaalPrijs = prijsPerNacht * aantalNachten;
+
+            var rating = type === "hotel" ? (3 + Math.floor(Math.random() * 3)) : (type === "villa" ? 5 : 4);
+            var sterren = "";
+            for (var s = 0; s < rating; s++) {
+                sterren += "\u2605";
+            }
+
+            var afstand = (0.5 + Math.random() * 4).toFixed(1);
+
+            accommodaties.push({
+                naam: naam,
+                type: type,
+                rating: rating,
+                sterren: sterren,
+                prijsPerNacht: prijsPerNacht,
+                totaalPrijs: totaalPrijs,
+                afstand: afstand,
+                aantalPersonen: aantalPersonen
+            });
+        }
+    }
+
+    return accommodaties.sort(function(a, b) { return a.totaalPrijs - b.totaalPrijs; });
+}
+
+function zoekAccommodatie() {
+    var checkboxes = document.querySelectorAll('input[name="accommodationType"]:checked');
+    var types = [];
+    for (var i = 0; i < checkboxes.length; i++) {
+        types.push(checkboxes[i].value);
+    }
+
+    if (types.length === 0) {
+        alert("Selecteer minimaal één accommodatie type.");
+        return;
+    }
+
+    if (!geselecteerdeBestemming) {
+        alert("Selecteer eerst een bestemming.");
+        return;
+    }
+
+    var vertrekDatum = new Date(document.getElementById("vertrekdatum").value + "T00:00:00");
+    var terugDatum = new Date(document.getElementById("terugdatum").value + "T00:00:00");
+    var aantalNachten = Math.round((terugDatum - vertrekDatum) / 86400000);
+    var aantalPersonen = aantalVolwassenen + aantalKinderen;
+
+    var accommodaties = genereerAccommodaties(types, aantalPersonen, aantalNachten);
+    var accommodationsList = document.getElementById("accommodationsList");
+    accommodationsList.innerHTML = "";
+
+    for (var i = 0; i < accommodaties.length; i++) {
+        var acc = accommodaties[i];
+
+        var card = document.createElement("div");
+        card.className = "accommodation-card";
+        card.onclick = (function(cardElement, accommodatieData) {
+            return function() {
+                var allCards = document.querySelectorAll(".accommodation-card");
+                for (var k = 0; k < allCards.length; k++) {
+                    allCards[k].classList.remove("selected");
+                }
+                cardElement.classList.add("selected");
+                geselecteerdeAccommodatie = accommodatieData;
+            };
+        })(card, acc);
+
+        card.ondblclick = (function(cardElement, accommodatieData) {
+            return function() {
+                var allCards = document.querySelectorAll(".accommodation-card");
+                for (var k = 0; k < allCards.length; k++) {
+                    allCards[k].classList.remove("selected");
+                    if (allCards[k] !== cardElement) {
+                        allCards[k].style.display = "none";
+                    }
+                }
+                cardElement.classList.add("selected");
+                geselecteerdeAccommodatie = accommodatieData;
+
+                updateSamenvatting();
+
+                document.getElementById("bookingSection").classList.add("active");
+                document.getElementById("bookingSection").scrollIntoView({ behavior: "smooth" });
+            };
+        })(card, acc);
+
+        var typeLabel = acc.type === "hotel" ? "Hotel" : acc.type === "appartement" ? "Appartement" : "Villa";
+
+        card.innerHTML =
+            '<div class="accommodation-header">' +
+                '<div class="accommodation-info">' +
+                    '<div class="accommodation-name">' + acc.naam + '</div>' +
+                    '<div class="accommodation-type">' + typeLabel + ' <span class="accommodation-rating">' + acc.sterren + '</span></div>' +
+                '</div>' +
+                '<div class="accommodation-price">' +
+                    '<div class="accommodation-total">\u20AC' + acc.totaalPrijs + '</div>' +
+                    '<div class="accommodation-per-night">\u20AC' + acc.prijsPerNacht + ' per nacht</div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="accommodation-details">' +
+                '<div class="accommodation-detail"><strong>' + aantalNachten + '</strong> nachten</div>' +
+                '<div class="accommodation-detail"><strong>' + acc.aantalPersonen + '</strong> ' + (acc.aantalPersonen === 1 ? 'persoon' : 'personen') + '</div>' +
+                '<div class="accommodation-detail"><strong>' + acc.afstand + ' km</strong> van centrum</div>' +
+            '</div>';
+
+        accommodationsList.appendChild(card);
+    }
+
+    document.getElementById("accommodationsResults").classList.add("active");
+    document.getElementById("accommodationsResults").scrollIntoView({ behavior: "smooth" });
+}
+
+var maandNamen = ["januari", "februari", "maart", "april", "mei", "juni", "juli", "augustus", "september", "oktober", "november", "december"];
+var dagenInMaand = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+function getTempClass(temp) {
+    if (temp < 15) return "cold";
+    if (temp < 20) return "mild";
+    if (temp < 25) return "warm";
+    return "hot";
+}
+
+function berekenReisdagen(vliegtijd) {
+    if (vliegtijd <= 2) return 0;
+    if (vliegtijd <= 4) return 1;
+    return 2;
+}
+
+function berekenGemTemp(bestemming, startDatum, aantalDagen) {
+    var eindDatum = new Date(startDatum);
+    eindDatum.setDate(eindDatum.getDate() + aantalDagen - 1);
+    var startMaand = startDatum.getMonth();
+    var eindMaand = eindDatum.getMonth();
+    if (startMaand === eindMaand) return bestemming.temp[startMaand];
+    var dagenResterendInStartMaand = dagenInMaand[startMaand] - startDatum.getDate() + 1;
+    var dagenInEindMaand = eindDatum.getDate();
+    var totaalDagen = dagenResterendInStartMaand + dagenInEindMaand;
+    var gewogenTemp = (bestemming.temp[startMaand] * dagenResterendInStartMaand + bestemming.temp[eindMaand] * dagenInEindMaand) / totaalDagen;
+    return Math.round(gewogenTemp * 10) / 10;
+}
+
+var luchthavens = [
+    { code: "BCN", naam: "Barcelona El Prat", lat: 41.30, lng: 2.08 },
+    { code: "PMI", naam: "Palma de Mallorca", lat: 39.55, lng: 2.74 },
+    { code: "AGP", naam: "Málaga Costa del Sol", lat: 36.67, lng: -4.49 },
+    { code: "TFS", naam: "Tenerife Sur", lat: 28.04, lng: -16.57 },
+    { code: "ACE", naam: "Lanzarote", lat: 28.95, lng: -13.61 },
+    { code: "IBZ", naam: "Ibiza", lat: 38.87, lng: 1.37 },
+    { code: "FCO", naam: "Rome Fiumicino", lat: 41.80, lng: 12.25 },
+    { code: "CTA", naam: "Catania", lat: 37.47, lng: 15.07 },
+    { code: "CAG", naam: "Cagliari", lat: 39.25, lng: 9.06 },
+    { code: "NAP", naam: "Napels", lat: 40.88, lng: 14.29 },
+    { code: "MXP", naam: "Milaan Malpensa", lat: 45.63, lng: 8.72 },
+    { code: "NCE", naam: "Nice Côte d'Azur", lat: 43.66, lng: 7.22 },
+    { code: "AJA", naam: "Ajaccio", lat: 41.92, lng: 8.80 },
+    { code: "ATH", naam: "Athene", lat: 37.94, lng: 23.94 },
+    { code: "HER", naam: "Heraklion", lat: 35.34, lng: 25.18 },
+    { code: "RHO", naam: "Rhodos", lat: 36.41, lng: 28.09 },
+    { code: "CFU", naam: "Corfu", lat: 39.60, lng: 19.91 },
+    { code: "JTR", naam: "Santorini", lat: 36.40, lng: 25.48 },
+    { code: "LIS", naam: "Lissabon", lat: 38.77, lng: -9.13 },
+    { code: "FAO", naam: "Faro", lat: 37.01, lng: -7.97 },
+    { code: "FNC", naam: "Madeira Funchal", lat: 32.69, lng: -16.77 },
+    { code: "DBV", naam: "Dubrovnik", lat: 42.56, lng: 18.27 },
+    { code: "SPU", naam: "Split", lat: 43.54, lng: 16.30 },
+    { code: "AYT", naam: "Antalya", lat: 36.90, lng: 30.80 },
+    { code: "BJV", naam: "Bodrum Milas", lat: 37.25, lng: 27.67 },
+    { code: "IST", naam: "Istanbul", lat: 41.26, lng: 28.74 },
+    { code: "RAK", naam: "Marrakech", lat: 31.61, lng: -8.04 },
+    { code: "TUN", naam: "Tunis Carthage", lat: 36.85, lng: 10.23 },
+    { code: "MLA", naam: "Malta", lat: 35.86, lng: 14.48 },
+    { code: "LCA", naam: "Larnaca", lat: 34.88, lng: 33.62 },
+    { code: "CDG", naam: "Parijs Charles de Gaulle", lat: 49.01, lng: 2.55 },
+    { code: "BER", naam: "Berlijn Brandenburg", lat: 52.37, lng: 13.52 },
+    { code: "VIE", naam: "Wenen", lat: 48.11, lng: 16.57 },
+    { code: "PRG", naam: "Praag", lat: 50.10, lng: 14.26 },
+    { code: "BUD", naam: "Budapest", lat: 47.44, lng: 19.26 },
+    { code: "LHR", naam: "Londen Heathrow", lat: 51.47, lng: -0.46 },
+    { code: "EDI", naam: "Edinburgh", lat: 55.95, lng: -3.37 },
+    { code: "CPH", naam: "Kopenhagen", lat: 55.62, lng: 12.66 },
+    { code: "ARN", naam: "Stockholm Arlanda", lat: 59.65, lng: 17.94 },
+    { code: "TGD", naam: "Podgorica", lat: 42.36, lng: 19.25 },
+    { code: "TLV", naam: "Tel Aviv Ben Gurion", lat: 32.01, lng: 34.89 },
+    { code: "HRG", naam: "Hurghada", lat: 27.18, lng: 33.80 },
+    { code: "KEF", naam: "Reykjavik Keflavik", lat: 63.99, lng: -22.62 },
+    { code: "VLC", naam: "Valencia", lat: 39.49, lng: -0.48 },
+    { code: "SVQ", naam: "Sevilla", lat: 37.42, lng: -5.90 },
+    { code: "BIO", naam: "Bilbao", lat: 43.30, lng: -2.91 },
+    { code: "ALC", naam: "Alicante", lat: 38.28, lng: -0.56 },
+    { code: "GRX", naam: "Granada", lat: 37.19, lng: -3.78 },
+    { code: "VCE", naam: "Venetië Marco Polo", lat: 45.51, lng: 12.35 },
+    { code: "FLR", naam: "Florence", lat: 43.81, lng: 11.20 },
+    { code: "VRN", naam: "Verona", lat: 45.40, lng: 10.89 },
+    { code: "BRI", naam: "Bari", lat: 41.14, lng: 16.76 },
+    { code: "PMO", naam: "Palermo", lat: 38.18, lng: 13.10 },
+    { code: "OPO", naam: "Porto", lat: 41.24, lng: -8.68 },
+    { code: "LYS", naam: "Lyon Saint-Exupéry", lat: 45.73, lng: 5.09 },
+    { code: "MRS", naam: "Marseille Provence", lat: 43.44, lng: 5.21 },
+    { code: "BOD", naam: "Bordeaux", lat: 44.83, lng: -0.72 },
+    { code: "TLS", naam: "Toulouse", lat: 43.63, lng: 1.37 },
+    { code: "KGS", naam: "Kos", lat: 36.79, lng: 27.09 },
+    { code: "ZTH", naam: "Zakynthos", lat: 37.75, lng: 20.88 },
+    { code: "JMK", naam: "Mykonos", lat: 37.44, lng: 25.35 },
+    { code: "JSI", naam: "Skiathos", lat: 39.18, lng: 23.50 },
+    { code: "KRK", naam: "Krakau", lat: 50.08, lng: 19.78 },
+    { code: "WAW", naam: "Warschau Chopin", lat: 52.17, lng: 20.97 },
+    { code: "GDN", naam: "Gdansk", lat: 54.38, lng: 18.47 },
+    { code: "DUB", naam: "Dublin", lat: 53.42, lng: -6.27 },
+    { code: "ORK", naam: "Cork", lat: 51.84, lng: -8.49 },
+    { code: "RIX", naam: "Riga", lat: 56.92, lng: 23.97 },
+    { code: "TLL", naam: "Tallinn", lat: 59.41, lng: 24.83 },
+    { code: "VNO", naam: "Vilnius", lat: 54.63, lng: 25.29 },
+    { code: "HEL", naam: "Helsinki Vantaa", lat: 60.32, lng: 24.96 },
+    { code: "OSL", naam: "Oslo Gardermoen", lat: 60.19, lng: 11.10 },
+    { code: "SOF", naam: "Sofia", lat: 42.69, lng: 23.41 },
+    { code: "OTP", naam: "Boekarest", lat: 44.57, lng: 26.10 },
+    { code: "BEG", naam: "Belgrado", lat: 44.82, lng: 20.31 },
+    { code: "ZAG", naam: "Zagreb", lat: 45.74, lng: 16.07 },
+    { code: "LJU", naam: "Ljubljana", lat: 46.22, lng: 14.46 },
+    { code: "BTS", naam: "Bratislava", lat: 48.17, lng: 17.21 },
+    { code: "MUC", naam: "München", lat: 48.35, lng: 11.79 },
+    { code: "HAM", naam: "Hamburg", lat: 53.63, lng: 10.01 },
+    { code: "FRA", naam: "Frankfurt", lat: 50.03, lng: 8.57 },
+    { code: "CGN", naam: "Keulen Bonn", lat: 50.87, lng: 7.14 },
+    { code: "DRS", naam: "Dresden", lat: 51.13, lng: 13.77 },
+    { code: "ZRH", naam: "Zürich", lat: 47.46, lng: 8.55 },
+    { code: "GVA", naam: "Genève", lat: 46.24, lng: 6.11 },
+    { code: "SZG", naam: "Salzburg", lat: 47.79, lng: 13.00 },
+    { code: "INN", naam: "Innsbruck", lat: 47.26, lng: 11.34 },
+    { code: "ADB", naam: "Izmir", lat: 38.29, lng: 27.16 },
+    { code: "AGA", naam: "Agadir", lat: 30.38, lng: -9.55 },
+    { code: "CMN", naam: "Casablanca", lat: 33.37, lng: -7.59 },
+    { code: "GLA", naam: "Glasgow", lat: 55.87, lng: -4.43 },
+    { code: "MAN", naam: "Manchester", lat: 53.35, lng: -2.27 },
+    { code: "BFS", naam: "Belfast", lat: 54.66, lng: -6.22 },
+    { code: "SJJ", naam: "Sarajevo", lat: 43.82, lng: 18.33 },
+    { code: "TIA", naam: "Tirana", lat: 41.41, lng: 19.72 },
+    { code: "SKP", naam: "Skopje", lat: 41.96, lng: 21.62 },
+    { code: "SKG", naam: "Thessaloniki", lat: 40.52, lng: 22.97 },
+    { code: "GOT", naam: "Göteborg", lat: 57.66, lng: 12.28 },
+    { code: "BRQ", naam: "Brno", lat: 49.15, lng: 16.69 }
+];
+
+function haversineKm(lat1, lng1, lat2, lng2) {
+    var R = 6371;
+    var dLat = (lat2 - lat1) * Math.PI / 180;
+    var dLng = (lng2 - lng1) * Math.PI / 180;
+    var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng/2) * Math.sin(dLng/2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+var bestemmingen = [
+    { naam: "Barcelona", land: "Spanje", vlag: "🇪🇸", reistijd: 2.5, lat: 41.39, lng: 2.17, temp: [10,11,13,15,19,23,26,26,23,18,14,11] },
+    { naam: "Mallorca", land: "Spanje", vlag: "🇪🇸", reistijd: 2.5, lat: 39.57, lng: 2.65, temp: [12,12,14,16,20,25,28,28,25,21,16,13] },
+    { naam: "Málaga", land: "Spanje", vlag: "🇪🇸", reistijd: 3, lat: 36.72, lng: -4.42, temp: [12,13,15,17,20,24,27,28,25,20,16,13] },
+    { naam: "Tenerife", land: "Canarische Eilanden", vlag: "🇪🇸", reistijd: 4.5, lat: 28.29, lng: -16.63, temp: [18,18,19,20,21,24,26,27,26,24,21,19] },
+    { naam: "Lanzarote", land: "Canarische Eilanden", vlag: "🇪🇸", reistijd: 4.5, lat: 28.95, lng: -13.60, temp: [17,18,19,20,21,23,25,26,26,23,20,18] },
+    { naam: "Ibiza", land: "Spanje", vlag: "🇪🇸", reistijd: 2.5, lat: 38.91, lng: 1.43, temp: [12,12,13,16,19,23,27,27,24,20,16,13] },
+    { naam: "Rome", land: "Italië", vlag: "🇮🇹", reistijd: 2.5, lat: 41.90, lng: 12.50, temp: [8,9,12,15,19,24,27,27,23,18,13,9] },
+    { naam: "Sicilië", land: "Italië", vlag: "🇮🇹", reistijd: 3, lat: 37.50, lng: 15.09, temp: [11,11,13,16,20,24,27,28,25,21,16,12] },
+    { naam: "Sardinië", land: "Italië", vlag: "🇮🇹", reistijd: 2.5, lat: 39.22, lng: 9.12, temp: [10,10,13,15,19,23,27,27,24,19,15,11] },
+    { naam: "Napels", land: "Italië", vlag: "🇮🇹", reistijd: 2.5, lat: 40.85, lng: 14.27, temp: [9,10,12,15,20,24,27,27,24,19,14,10] },
+    { naam: "Milaan", land: "Italië", vlag: "🇮🇹", reistijd: 1.5, lat: 45.46, lng: 9.19, temp: [3,6,11,15,20,24,26,26,21,15,9,4] },
+    { naam: "Nice", land: "Frankrijk", vlag: "🇫🇷", reistijd: 2, lat: 43.71, lng: 7.26, temp: [9,10,12,14,18,22,25,25,22,17,13,10] },
+    { naam: "Corsica", land: "Frankrijk", vlag: "🇫🇷", reistijd: 2.5, lat: 41.93, lng: 8.74, temp: [9,9,11,14,18,22,25,26,22,18,13,10] },
+    { naam: "Athene", land: "Griekenland", vlag: "🇬🇷", reistijd: 3.5, lat: 37.98, lng: 23.73, temp: [10,10,13,17,22,27,30,30,26,20,15,11] },
+    { naam: "Kreta", land: "Griekenland", vlag: "🇬🇷", reistijd: 4, lat: 35.34, lng: 25.13, temp: [12,12,14,17,21,25,28,28,24,20,17,13] },
+    { naam: "Rhodos", land: "Griekenland", vlag: "🇬🇷", reistijd: 4, lat: 36.43, lng: 28.22, temp: [12,12,14,17,21,26,28,28,26,21,17,13] },
+    { naam: "Corfu", land: "Griekenland", vlag: "🇬🇷", reistijd: 3, lat: 39.62, lng: 19.92, temp: [10,11,13,16,21,25,28,28,24,19,15,11] },
+    { naam: "Santorini", land: "Griekenland", vlag: "🇬🇷", reistijd: 4, lat: 36.39, lng: 25.46, temp: [12,12,13,16,20,25,27,27,24,20,16,13] },
+    { naam: "Lissabon", land: "Portugal", vlag: "🇵🇹", reistijd: 3, lat: 38.72, lng: -9.14, temp: [12,13,15,17,19,22,25,25,23,19,15,12] },
+    { naam: "Algarve", land: "Portugal", vlag: "🇵🇹", reistijd: 3, lat: 37.02, lng: -7.93, temp: [12,13,15,17,20,23,26,26,24,20,16,13] },
+    { naam: "Madeira", land: "Portugal", vlag: "🇵🇹", reistijd: 4, lat: 32.65, lng: -16.91, temp: [16,16,17,17,19,21,23,24,24,21,19,17] },
+    { naam: "Dubrovnik", land: "Kroatië", vlag: "🇭🇷", reistijd: 2.5, lat: 42.65, lng: 18.09, temp: [9,10,12,15,20,24,27,27,23,18,14,10] },
+    { naam: "Split", land: "Kroatië", vlag: "🇭🇷", reistijd: 2, lat: 43.51, lng: 16.44, temp: [8,9,12,15,20,24,27,27,23,18,13,9] },
+    { naam: "Antalya", land: "Turkije", vlag: "🇹🇷", reistijd: 4, lat: 36.90, lng: 30.69, temp: [10,11,14,17,22,27,30,30,27,21,16,12] },
+    { naam: "Bodrum", land: "Turkije", vlag: "🇹🇷", reistijd: 4, lat: 37.04, lng: 27.43, temp: [11,11,14,17,22,27,29,29,26,21,16,12] },
+    { naam: "Istanbul", land: "Turkije", vlag: "🇹🇷", reistijd: 3.5, lat: 41.01, lng: 28.98, temp: [6,6,9,14,19,24,26,26,22,17,12,8] },
+    { naam: "Marrakech", land: "Marokko", vlag: "🇲🇦", reistijd: 4, lat: 31.63, lng: -8.00, temp: [12,14,17,20,23,28,32,32,27,22,17,13] },
+    { naam: "Tunis", land: "Tunesië", vlag: "🇹🇳", reistijd: 3, lat: 36.81, lng: 10.18, temp: [11,12,14,17,21,25,28,29,26,21,16,12] },
+    { naam: "Malta", land: "Malta", vlag: "🇲🇹", reistijd: 3, lat: 35.90, lng: 14.51, temp: [13,13,14,17,20,25,28,28,26,22,18,14] },
+    { naam: "Cyprus", land: "Cyprus", vlag: "🇨🇾", reistijd: 4.5, lat: 34.92, lng: 33.62, temp: [12,12,14,18,22,27,30,30,27,23,17,13] },
+    { naam: "Parijs", land: "Frankrijk", vlag: "🇫🇷", reistijd: 1.5, lat: 48.86, lng: 2.35, temp: [5,6,10,13,17,20,23,22,19,14,9,5] },
+    { naam: "Berlijn", land: "Duitsland", vlag: "🇩🇪", reistijd: 1.5, lat: 52.52, lng: 13.40, temp: [1,2,6,10,16,19,22,21,17,11,6,2] },
+    { naam: "Wenen", land: "Oostenrijk", vlag: "🇦🇹", reistijd: 2, lat: 48.21, lng: 16.37, temp: [1,3,8,13,18,21,24,23,18,12,6,2] },
+    { naam: "Praag", land: "Tsjechië", vlag: "🇨🇿", reistijd: 1.5, lat: 50.08, lng: 14.44, temp: [0,1,6,11,16,19,22,21,17,11,5,1] },
+    { naam: "Budapest", land: "Hongarije", vlag: "🇭🇺", reistijd: 2, lat: 47.50, lng: 19.04, temp: [1,3,8,14,19,22,25,24,19,13,7,2] },
+    { naam: "Londen", land: "Verenigd Koninkrijk", vlag: "🇬🇧", reistijd: 1, lat: 51.51, lng: -0.13, temp: [5,5,8,11,14,18,20,20,17,13,8,5] },
+    { naam: "Edinburgh", land: "Schotland", vlag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿", reistijd: 1.5, lat: 55.95, lng: -3.19, temp: [4,5,7,9,12,14,16,16,14,10,7,4] },
+    { naam: "Kopenhagen", land: "Denemarken", vlag: "🇩🇰", reistijd: 1.5, lat: 55.68, lng: 12.57, temp: [1,1,4,9,13,17,19,19,15,10,6,2] },
+    { naam: "Stockholm", land: "Zweden", vlag: "🇸🇪", reistijd: 2, lat: 59.33, lng: 18.07, temp: [-1,-1,2,7,13,17,20,19,14,8,4,0] },
+    { naam: "Montenegro", land: "Montenegro", vlag: "🇲🇪", reistijd: 2.5, lat: 42.44, lng: 19.26, temp: [8,9,12,16,20,25,28,28,24,19,13,9] },
+    { naam: "Tel Aviv", land: "Israël", vlag: "🇮🇱", reistijd: 4.5, lat: 32.08, lng: 34.78, temp: [14,14,16,20,23,26,28,29,27,24,19,15] },
+    { naam: "Hurghada", land: "Egypte", vlag: "🇪🇬", reistijd: 5, lat: 27.26, lng: 33.81, temp: [16,17,20,24,28,31,33,33,30,27,22,18] },
+    { naam: "Reykjavik", land: "IJsland", vlag: "🇮🇸", reistijd: 3.5, lat: 64.15, lng: -21.94, temp: [1,1,2,4,7,10,12,11,9,5,3,1] },
+    { naam: "Valencia", land: "Spanje", vlag: "🇪🇸", reistijd: 2.5, lat: 39.47, lng: -0.38, temp: [11,12,14,16,19,23,26,27,24,19,15,12] },
+    { naam: "Sevilla", land: "Spanje", vlag: "🇪🇸", reistijd: 3, lat: 37.39, lng: -5.98, temp: [11,13,16,18,22,26,29,29,26,21,16,12] },
+    { naam: "Bilbao", land: "Spanje", vlag: "🇪🇸", reistijd: 2, lat: 43.26, lng: -2.93, temp: [9,10,11,13,16,19,21,22,20,17,12,10] },
+    { naam: "Alicante", land: "Spanje", vlag: "🇪🇸", reistijd: 2.5, lat: 38.35, lng: -0.48, temp: [12,13,15,17,20,24,27,28,25,20,16,13] },
+    { naam: "Granada", land: "Spanje", vlag: "🇪🇸", reistijd: 3, lat: 37.18, lng: -3.60, temp: [7,9,12,14,18,23,27,27,23,17,12,8] },
+    { naam: "Venetië", land: "Italië", vlag: "🇮🇹", reistijd: 1.5, lat: 45.44, lng: 12.32, temp: [4,6,10,14,19,23,26,25,21,15,9,5] },
+    { naam: "Florence", land: "Italië", vlag: "🇮🇹", reistijd: 2, lat: 43.77, lng: 11.25, temp: [6,8,11,14,19,23,26,26,22,16,11,7] },
+    { naam: "Verona", land: "Italië", vlag: "🇮🇹", reistijd: 1.5, lat: 45.44, lng: 10.99, temp: [4,6,11,15,20,24,27,26,22,15,9,5] },
+    { naam: "Bari", land: "Italië", vlag: "🇮🇹", reistijd: 2.5, lat: 41.12, lng: 16.87, temp: [9,10,12,15,19,23,26,27,24,19,14,10] },
+    { naam: "Palermo", land: "Sicilië", vlag: "🇮🇹", reistijd: 3, lat: 38.12, lng: 13.36, temp: [12,12,14,16,20,24,27,28,25,21,17,13] },
+    { naam: "Porto", land: "Portugal", vlag: "🇵🇹", reistijd: 2.5, lat: 41.16, lng: -8.62, temp: [9,10,12,14,16,19,21,21,20,16,12,10] },
+    { naam: "Lyon", land: "Frankrijk", vlag: "🇫🇷", reistijd: 1.5, lat: 45.76, lng: 4.84, temp: [4,6,10,13,17,21,24,23,19,14,8,5] },
+    { naam: "Marseille", land: "Frankrijk", vlag: "🇫🇷", reistijd: 2, lat: 43.30, lng: 5.37, temp: [7,8,11,14,18,22,25,25,21,16,11,8] },
+    { naam: "Bordeaux", land: "Frankrijk", vlag: "🇫🇷", reistijd: 2, lat: 44.84, lng: -0.58, temp: [6,7,10,12,16,19,21,21,18,14,9,7] },
+    { naam: "Toulouse", land: "Frankrijk", vlag: "🇫🇷", reistijd: 2, lat: 43.60, lng: 1.44, temp: [6,8,11,13,17,21,24,24,20,15,10,7] },
+    { naam: "Kos", land: "Griekenland", vlag: "🇬🇷", reistijd: 4, lat: 36.89, lng: 27.29, temp: [12,12,14,17,21,26,28,28,25,21,17,13] },
+    { naam: "Zakynthos", land: "Griekenland", vlag: "🇬🇷", reistijd: 3.5, lat: 37.79, lng: 20.90, temp: [11,11,13,16,20,24,27,27,24,20,16,12] },
+    { naam: "Mykonos", land: "Griekenland", vlag: "🇬🇷", reistijd: 4, lat: 37.44, lng: 25.37, temp: [11,11,13,16,20,24,26,26,23,19,15,12] },
+    { naam: "Skiathos", land: "Griekenland", vlag: "🇬🇷", reistijd: 3.5, lat: 39.16, lng: 23.49, temp: [8,9,11,15,20,24,27,27,23,18,13,10] },
+    { naam: "Krakau", land: "Polen", vlag: "🇵🇱", reistijd: 2, lat: 50.06, lng: 19.94, temp: [0,1,6,11,16,19,22,21,16,11,5,1] },
+    { naam: "Warschau", land: "Polen", vlag: "🇵🇱", reistijd: 2, lat: 52.23, lng: 21.01, temp: [-1,0,5,11,16,20,22,21,16,10,5,1] },
+    { naam: "Gdansk", land: "Polen", vlag: "🇵🇱", reistijd: 1.5, lat: 54.35, lng: 18.65, temp: [0,0,3,8,13,17,19,19,15,10,5,2] },
+    { naam: "Dublin", land: "Ierland", vlag: "🇮🇪", reistijd: 1.5, lat: 53.35, lng: -6.26, temp: [5,5,7,9,11,14,16,16,14,11,7,6] },
+    { naam: "Cork", land: "Ierland", vlag: "🇮🇪", reistijd: 1.5, lat: 51.90, lng: -8.49, temp: [6,6,8,10,12,15,17,17,15,12,9,7] },
+    { naam: "Riga", land: "Letland", vlag: "🇱🇻", reistijd: 2, lat: 56.95, lng: 24.11, temp: [-3,-3,1,8,14,17,20,19,14,8,3,-1] },
+    { naam: "Tallinn", land: "Estland", vlag: "🇪🇪", reistijd: 2, lat: 59.44, lng: 24.75, temp: [-3,-4,0,6,12,16,19,18,13,7,2,-1] },
+    { naam: "Vilnius", land: "Litouwen", vlag: "🇱🇹", reistijd: 2, lat: 54.69, lng: 25.28, temp: [-4,-3,1,8,15,18,20,19,14,8,3,-1] },
+    { naam: "Helsinki", land: "Finland", vlag: "🇫🇮", reistijd: 2.5, lat: 60.17, lng: 24.94, temp: [-4,-5,-1,5,11,16,19,17,12,6,1,-2] },
+    { naam: "Oslo", land: "Noorwegen", vlag: "🇳🇴", reistijd: 1.5, lat: 59.91, lng: 10.75, temp: [-2,-2,2,7,13,16,18,17,12,7,2,-1] },
+    { naam: "Sofia", land: "Bulgarije", vlag: "🇧🇬", reistijd: 2.5, lat: 42.70, lng: 23.32, temp: [1,3,8,13,18,21,24,24,19,13,7,2] },
+    { naam: "Boekarest", land: "Roemenië", vlag: "🇷🇴", reistijd: 3, lat: 44.43, lng: 26.11, temp: [0,2,8,14,19,23,25,25,20,14,7,2] },
+    { naam: "Belgrado", land: "Servië", vlag: "🇷🇸", reistijd: 2, lat: 44.79, lng: 20.45, temp: [1,4,9,14,19,23,25,25,20,14,8,3] },
+    { naam: "Zagreb", land: "Kroatië", vlag: "🇭🇷", reistijd: 1.5, lat: 45.81, lng: 15.98, temp: [1,3,8,13,18,21,24,23,19,13,7,3] },
+    { naam: "Ljubljana", land: "Slovenië", vlag: "🇸🇮", reistijd: 1.5, lat: 46.06, lng: 14.51, temp: [1,3,8,12,17,20,23,22,18,12,6,2] },
+    { naam: "Bratislava", land: "Slowakije", vlag: "🇸🇰", reistijd: 1.5, lat: 48.15, lng: 17.11, temp: [0,2,7,12,17,20,23,22,18,12,6,2] },
+    { naam: "München", land: "Duitsland", vlag: "🇩🇪", reistijd: 1.5, lat: 52.37, lng: 11.54, temp: [0,2,6,10,15,18,21,20,16,10,5,1] },
+    { naam: "Hamburg", land: "Duitsland", vlag: "🇩🇪", reistijd: 1, lat: 53.55, lng: 9.99, temp: [2,2,5,9,14,17,19,19,15,11,6,3] },
+    { naam: "Frankfurt", land: "Duitsland", vlag: "🇩🇪", reistijd: 1, lat: 50.11, lng: 8.68, temp: [2,3,7,11,16,19,21,21,17,12,6,3] },
+    { naam: "Keulen", land: "Duitsland", vlag: "🇩🇪", reistijd: 1, lat: 50.94, lng: 6.96, temp: [3,4,8,12,16,19,21,21,17,13,7,4] },
+    { naam: "Dresden", land: "Duitsland", vlag: "🇩🇪", reistijd: 1.5, lat: 51.05, lng: 13.74, temp: [0,1,6,10,16,19,21,21,16,11,5,2] },
+    { naam: "Zürich", land: "Zwitserland", vlag: "🇨🇭", reistijd: 1.5, lat: 47.37, lng: 8.55, temp: [1,3,7,11,15,19,21,21,17,12,6,2] },
+    { naam: "Genève", land: "Zwitserland", vlag: "🇨🇭", reistijd: 1.5, lat: 46.20, lng: 6.14, temp: [2,4,8,12,16,20,22,22,18,13,7,3] },
+    { naam: "Salzburg", land: "Oostenrijk", vlag: "🇦🇹", reistijd: 1.5, lat: 47.80, lng: 13.04, temp: [0,2,7,11,16,19,22,21,17,11,6,2] },
+    { naam: "Innsbruck", land: "Oostenrijk", vlag: "🇦🇹", reistijd: 1.5, lat: 47.27, lng: 11.39, temp: [-1,1,6,10,15,18,21,20,16,11,5,1] },
+    { naam: "Izmir", land: "Turkije", vlag: "🇹🇷", reistijd: 3.5, lat: 38.42, lng: 27.14, temp: [9,10,13,17,22,27,30,30,26,20,15,11] },
+    { naam: "Agadir", land: "Marokko", vlag: "🇲🇦", reistijd: 4, lat: 30.43, lng: -9.60, temp: [13,14,16,17,19,21,23,23,22,20,17,14] },
+    { naam: "Casablanca", land: "Marokko", vlag: "🇲🇦", reistijd: 3.5, lat: 33.57, lng: -7.59, temp: [12,13,14,16,18,21,23,24,23,20,16,13] },
+    { naam: "Glasgow", land: "Schotland", vlag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿", reistijd: 1.5, lat: 55.86, lng: -4.25, temp: [4,4,6,9,12,14,16,16,14,10,7,5] },
+    { naam: "Manchester", land: "Verenigd Koninkrijk", vlag: "🇬🇧", reistijd: 1, lat: 53.48, lng: -2.24, temp: [4,5,7,9,13,16,18,17,15,11,7,5] },
+    { naam: "Belfast", land: "Noord-Ierland", vlag: "🇬🇧", reistijd: 1.5, lat: 54.60, lng: -5.93, temp: [4,5,7,9,12,14,16,16,14,11,7,5] },
+    { naam: "Sarajevo", land: "Bosnië en Herzegovina", vlag: "🇧🇦", reistijd: 2, lat: 43.86, lng: 18.41, temp: [0,2,7,12,17,20,23,23,18,13,7,2] },
+    { naam: "Tirana", land: "Albanië", vlag: "🇦🇱", reistijd: 2.5, lat: 41.33, lng: 19.82, temp: [7,8,11,15,20,24,27,27,23,18,13,8] },
+    { naam: "Skopje", land: "Noord-Macedonië", vlag: "🇲🇰", reistijd: 2.5, lat: 42.00, lng: 21.43, temp: [1,4,9,14,19,23,26,26,21,15,9,3] },
+    { naam: "Thessaloniki", land: "Griekenland", vlag: "🇬🇷", reistijd: 3, lat: 40.64, lng: 22.94, temp: [6,7,10,14,20,25,28,28,23,17,12,8] },
+    { naam: "Göteborg", land: "Zweden", vlag: "🇸🇪", reistijd: 1.5, lat: 57.71, lng: 11.97, temp: [0,0,3,7,13,16,18,18,14,9,5,2] },
+    { naam: "Brno", land: "Tsjechië", vlag: "🇨🇿", reistijd: 1.5, lat: 49.19, lng: 16.61, temp: [0,1,6,11,16,19,22,21,17,11,5,1] }
+];
+
+function zoekBestemmingen() {
+    resetAlles();
+
+    var vertrekInput = document.getElementById("vertrekdatum").value;
+    var terugInput = document.getElementById("terugdatum").value;
+    var minTemp = parseFloat(document.getElementById("minTemp").value);
+    var maxReisduur = parseFloat(document.getElementById("maxReisduur").value);
+
+    if (!vertrekInput || !terugInput || isNaN(minTemp) || isNaN(maxReisduur)) {
+        alert("Vul alsjeblieft alle velden correct in.");
+        return;
+    }
+
+    var basisVertrek = new Date(vertrekInput + "T00:00:00");
+    var basisTerug = new Date(terugInput + "T00:00:00");
+
+    if (basisTerug <= basisVertrek) {
+        alert("De terugreisdatum moet na de vertrekdatum liggen.");
+        return;
+    }
+
+    var basisDagen = dagenTussen(basisVertrek, basisTerug);
+    var vertrekVroegst = new Date(basisVertrek);
+    vertrekVroegst.setDate(vertrekVroegst.getDate() - flexVoor);
+    var vertrekLaatst = new Date(basisVertrek);
+    vertrekLaatst.setDate(vertrekLaatst.getDate() + flexNa);
+    var terugVroegst = new Date(basisTerug);
+    terugVroegst.setDate(terugVroegst.getDate() - flexTerugVoor);
+    var terugLaatst = new Date(basisTerug);
+    terugLaatst.setDate(terugLaatst.getDate() + flexTerugNa);
+
+    var resultaten = [];
+
+    for (var bi = 0; bi < bestemmingen.length; bi++) {
+        var b = bestemmingen[bi];
+
+        if (b.reistijd > maxReisduur) {
+            continue;
+        }
+
+        var reisdagen = berekenReisdagen(b.reistijd);
+        var besteTemp = -Infinity;
+        var besteStart = basisVertrek;
+        var besteEind = basisTerug;
+        var besteAantalDagen = basisDagen;
+
+        var vCursor = new Date(vertrekVroegst);
+        while (vCursor <= vertrekLaatst) {
+            var tCursor = new Date(terugVroegst);
+            while (tCursor <= terugLaatst) {
+                if (tCursor > vCursor) {
+                    var dagen = dagenTussen(vCursor, tCursor);
+                    if (dagen - reisdagen >= 2) {
+                        var temp = berekenGemTemp(b, vCursor, dagen);
+                        if (temp > besteTemp) {
+                            besteTemp = temp;
+                            besteStart = new Date(vCursor);
+                            besteEind = new Date(tCursor);
+                            besteAantalDagen = dagen;
+                        }
+                    }
+                }
+                tCursor.setDate(tCursor.getDate() + 1);
+            }
+            vCursor.setDate(vCursor.getDate() + 1);
+        }
+
+        if (besteTemp >= minTemp && besteAantalDagen - reisdagen >= 2) {
+            resultaten.push({
+                naam: b.naam,
+                land: b.land,
+                vlag: b.vlag,
+                reistijd: b.reistijd,
+                gemTemp: besteTemp,
+                reisdagen: reisdagen,
+                nettoDagen: besteAantalDagen - reisdagen,
+                aantalDagen: besteAantalDagen,
+                vertrekDatum: besteStart,
+                terugDatum: besteEind
+            });
+        }
+    }
+
+    resultaten.sort(function(a, b) {
+        return b.gemTemp - a.gemTemp || b.nettoDagen - a.nettoDagen;
+    });
+
+    var list = document.getElementById("resultsList");
+    var header = document.getElementById("resultsHeader");
+    var noResults = document.getElementById("noResults");
+    var welcomeMsg = document.getElementById("welcomeMsg");
+
+    list.innerHTML = "";
+    welcomeMsg.style.display = "none";
+
+    if (resultaten.length === 0) {
+        noResults.style.display = "flex";
+        header.style.display = "none";
+        return;
+    }
+
+    noResults.style.display = "none";
+    header.style.display = "block";
+    header.innerHTML = "<span>" + resultaten.length + " bestemming" + (resultaten.length !== 1 ? "en" : "") + " &bull; " + basisDagen + " dagen</span>";
+
+    var heeftFlex = flexVoor > 0 || flexNa > 0 || flexTerugVoor > 0 || flexTerugNa > 0;
+
+    for (var ri = 0; ri < resultaten.length; ri++) {
+        (function(b, i) {
+            var cls = getTempClass(b.gemTemp);
+            var tempDisplay = Number.isInteger(b.gemTemp) ? b.gemTemp : b.gemTemp.toFixed(1);
+            var periodeKort = formatDatumKort(b.vertrekDatum) + " – " + formatDatumKort(b.terugDatum);
+
+            var flexIndicator = "";
+            if (heeftFlex) {
+                var diffVertrek = Math.round((b.vertrekDatum - basisVertrek) / 86400000);
+                var diffTerug = Math.round((b.terugDatum - basisTerug) / 86400000);
+                var parts = [];
+                if (diffVertrek < 0) parts.push(Math.abs(diffVertrek) + "d←");
+                else if (diffVertrek > 0) parts.push(diffVertrek + "d→");
+                if (diffTerug < 0) parts.push(Math.abs(diffTerug) + "d←");
+                else if (diffTerug > 0) parts.push(diffTerug + "d→");
+                if (parts.length) flexIndicator = '<span class="flex-indicator">' + parts.join(" ") + '</span>';
+            }
+
+            var row = document.createElement("div");
+            row.className = "result-row";
+            row.style.animationDelay = (i * 0.04) + "s";
+
+            row.onclick = (function(bestemming, rowElement) {
+                return function() {
+                    selectBestemming(bestemming, rowElement);
+                };
+            })(b, row);
+
+            row.ondblclick = (function(bestemming, rowElement) {
+                return function() {
+                    selectBestemming(bestemming, rowElement);
+                    zoekVluchten();
+                };
+            })(b, row);
+
+            row.innerHTML =
+                '<div class="temp-bar bar-' + cls + '"></div>' +
+                '<div class="result-info">' +
+                    '<div class="result-name">' + b.vlag + ' ' + b.naam + ' <span style="font-weight:400;color:#999;font-size:0.8rem">' + b.land + '</span></div>' +
+                    '<div class="result-sub">' + periodeKort + ' &nbsp;(' + b.aantalDagen + ' dgn) ' + flexIndicator + '</div>' +
+                '</div>' +
+                '<div class="result-stats">' +
+                    '<div class="result-stat"><div class="result-stat-val temp-' + cls + '">' + tempDisplay + '°</div><div class="result-stat-label">temp</div></div>' +
+                    '<div class="result-stat"><div class="result-stat-val">' + b.reistijd + 'u</div><div class="result-stat-label">vlucht</div></div>' +
+                '</div>';
+
+            list.appendChild(row);
+        })(resultaten[ri], ri);
+    }
+}
+</script>
+
+</body>
+</html>
