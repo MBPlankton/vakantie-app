@@ -2,7 +2,13 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#00b4db">
+    <meta name="description" content="Vind jouw perfecte vakantiebestemming op basis van datum en gewenste temperatuur">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Vakantie App">
+    <link rel="manifest" href="manifest.json">
     <title>Vakantie Bestemming Zoeker</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
@@ -413,9 +419,74 @@
         .footer { text-align: center; padding: 2rem; color: rgba(255,255,255,0.6); font-size: 0.9rem; }
 
         @media (max-width: 1024px) {
-            .main-layout { flex-direction: column; }
-            .search-panel { flex: 0 0 auto; width: 100%; max-width: 600px; margin: 0 auto; }
-            .results-section { min-height: 500px; }
+            .content-row { flex-direction: column; }
+            .search-panel { flex: 0 0 auto; width: 100%; max-width: none; }
+            .results-column { width: 100%; }
+            .results-section { min-height: 400px; max-height: 400px; }
+        }
+
+        @media (max-width: 768px) {
+            .hero { padding: 2rem 1rem 3rem; }
+            .hero h1 { font-size: 1.8rem; }
+            .hero h1 .icon { font-size: 2rem; }
+            .hero p { font-size: 1rem; }
+
+            .main-layout { padding: 0 1rem; margin: -1.5rem auto 1rem; }
+            .search-panel { padding: 1rem; border-radius: 16px; }
+            .search-panel h2 { font-size: 1.1rem; }
+
+            .passagiers-display { font-size: 0.9rem; padding: 0.65rem 0.9rem; }
+            .passagier-row { padding: 0.6rem 0; }
+            .passagier-type { font-size: 0.85rem; }
+            .passagier-age { font-size: 0.75rem; }
+
+            .datum-groep { flex-direction: column; gap: 0.5rem; }
+            .datum-flex-group { width: 100%; }
+
+            .form-group input, .form-group select { font-size: 0.95rem; padding: 0.65rem 0.9rem; }
+            .btn-zoek { font-size: 1rem; padding: 0.75rem; }
+
+            .flight-row { flex-direction: column; gap: 0.5rem; }
+            .flight-swap { display: none; }
+            .accommodation-options { flex-direction: column; gap: 0.5rem; }
+
+            .result-row { padding: 0.8rem 1rem; flex-wrap: wrap; }
+            .result-name { font-size: 0.95rem; }
+            .result-stats { gap: 1rem; }
+            .result-stat-val { font-size: 1rem; }
+            .result-stat-label { font-size: 0.65rem; }
+
+            .flights-results, .accommodations-results, .booking-section { padding: 1rem; border-radius: 16px; }
+            .flights-results h3, .accommodations-results h3, .booking-section h3 { font-size: 1.1rem; }
+
+            .flight-combo { padding: 0.6rem; }
+            .flight-combo-price { font-size: 1rem; }
+            .flight-leg { flex-wrap: wrap; }
+            .flight-airline-info { flex: 0 0 70px; }
+
+            .accommodation-card { padding: 0.65rem; }
+            .accommodation-name { font-size: 0.85rem; }
+            .accommodation-type { font-size: 0.65rem; }
+            .accommodation-total { font-size: 1.1rem; }
+
+            .summary-content { padding: 0.8rem 1rem; }
+            .summary-item { padding: 0.4rem 0; font-size: 0.85rem; }
+            .summary-label, .summary-value { font-size: 0.85rem; }
+            .summary-item.total .summary-label, .summary-item.total .summary-value { font-size: 0.95rem; }
+
+            .btn-book { font-size: 1.1rem; padding: 0.9rem 1.5rem; }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 { font-size: 1.5rem; }
+            .hero p { font-size: 0.9rem; }
+            .search-panel { padding: 0.8rem; }
+            .form-grid { gap: 0.6rem; }
+            .btn-zoek { font-size: 0.95rem; }
+            .result-row { padding: 0.7rem 0.8rem; }
+            .result-stats { gap: 0.7rem; flex-wrap: wrap; }
+            .flight-combo-price { font-size: 0.95rem; }
+            .accommodation-details { flex-direction: column; gap: 0.3rem; }
         }
     </style>
 </head>
@@ -1540,6 +1611,19 @@ function zoekBestemmingen() {
             list.appendChild(row);
         })(resultaten[ri], ri);
     }
+}
+
+// Service Worker registratie voor PWA
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('sw.js')
+            .then(function(registration) {
+                console.log('ServiceWorker registratie succesvol:', registration.scope);
+            })
+            .catch(function(error) {
+                console.log('ServiceWorker registratie mislukt:', error);
+            });
+    });
 }
 </script>
 
