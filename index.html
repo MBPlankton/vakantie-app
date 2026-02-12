@@ -1631,14 +1631,6 @@ function zoekBestemmingen() {
     header.style.display = "block";
     header.innerHTML = "<span>" + resultaten.length + " bestemming" + (resultaten.length !== 1 ? "en" : "") + " &bull; " + basisDagen + " dagen</span>";
 
-    collapseSearchOnMobile();
-
-    if (window.innerWidth <= 768) {
-        setTimeout(function() {
-            document.querySelector(".results-section").scrollIntoView({ behavior: "smooth", block: "start" });
-        }, 100);
-    }
-
     var heeftFlex = flexVoor > 0 || flexNa > 0 || flexTerugVoor > 0 || flexTerugNa > 0;
 
     for (var ri = 0; ri < resultaten.length; ri++) {
@@ -1689,6 +1681,14 @@ function zoekBestemmingen() {
 
             list.appendChild(row);
         })(resultaten[ri], ri);
+    }
+
+    collapseSearchOnMobile();
+
+    if (window.innerWidth <= 768) {
+        setTimeout(function() {
+            document.querySelector(".results-section").scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 300);
     }
 }
 
